@@ -1,6 +1,9 @@
 const UserModel = require("../model/usersModel")
-//signup 
+const jwt = require("jsonwebtoken")
+const {SEC_KEY} = process.env
+const bcrypt = require("bcrypt")
 
+//signup 
 module.exports.signup =  async function(req,res){
     //validation
     //email unique 
@@ -10,29 +13,57 @@ module.exports.signup =  async function(req,res){
     //     email:req.body.email,
     //     password:req.body.password
     // })
+    let pass = req.body.password
+    let encpass = bcrypt.hashSync(pass,10)
+    console.log(encpass);
+    req.body.password = encpass
 
     let user = new UserModel(req.body) 
 
-   let data = await user.save() 
+    let data = await user.save() 
 
-   res.json({data:data,msg:"signup done",rcode:200})
+    res.json({data:data,msg:"signup done",rcode:200})
 }
 
 
 //login 
-module.exports.login = async function(req,res){
+/*module.exports.login = async function(req,res){
     
     let email = req.body.email 
     let password = req.body.password 
 
     let user = await UserModel.findOne({email:email})
-    
-    if(user && user.password == password){
-             token = parseInt(Math.random()*100000000000)
+    //user.password == password
+    if(user && bcrypt.compareSync(password,user.password)){
+             //token = parseInt(Math.random()*100000000000)
+             token = jwt.sign({"authId":user._id,"authority":"user"},SEC_KEY,{expiresIn:"7d"})
              console.log("token "+token);
-             user.token = token 
+             //update
              res.json({data:user,msg:"Login done",rcode:200})
     }else{      
             res.json({data:req.body,msg:"Invalid Credentials",rcode:-9})
     } 
+}*/
+module.exports.login = async function(req,res){
+    
+    let email = req.body.email 
+    let password = req.body.password 
+  
+    let user = await UserModel.findOne({email:email})
+    
+    if(user && bcrypt.compareSync(password,user.password)){
+             token = jwt.sign({ "authId":user._id,"authority":"user"},SEC_KEY,{expiresIn:"7d"})
+             console.log("token "+token);
+         
+             //update
+             res.json({data:user,msg:"Login done",rcode:200,token:token})
+    }else{      
+            res.json({data:req.body,msg:"Invalid Credentials",rcode:-9})
+    }
+  }
+
+module.exports.getAllUsers = function(req,res){
+    UserModel.find().then(data=>{
+        res.json({data:data,msg:"User retrived",rcode:200})
+    })
 }
