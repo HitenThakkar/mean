@@ -8,11 +8,15 @@ const publicRoutes = require("./app/src/routes/public.routes")
 const sessionControllerDb = require("./app/src/controller/sessionControllerDb")
 
 const authMiddlerware = require("./app/src/middleware/auth.middleware")
+const cors= require("cors")
 const app = express()
+
+
 
 //middlerware 
 app.use(express.urlencoded({extended:true}))
 app.use(express.json())
+app.use(cors())
 
 //private ->authenticated 
 app.use("/admin",authMiddlerware,categoryRoutes)
