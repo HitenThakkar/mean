@@ -27,7 +27,8 @@ app.use("/public",publicRoutes)
 app.post("/signup",sessionControllerDb.signup)
 app.post("/login",sessionControllerDb.login)
 app.get("/getallusers",sessionControllerDb.getAllUsers)
-
+app.delete("/deleteuser/:userId",sessionControllerDb.deleteUserById)
+app.get("/getuserbyid/:userId",sessionControllerDb.getUserById)
 
 app.listen(9099)
 console.log("server started 9099");
